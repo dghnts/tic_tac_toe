@@ -58,17 +58,23 @@ body {
 
 .square {
   background: #fff;
-  border: 1px solid #999;
+  border: 2px solid #333;
   float: left;
-  font-size: 24px;
+  font-size: 36px;
   font-weight: bold;
-  line-height: 34px;
-  height: 34px;
-  margin-right: -1px;
-  margin-top: -1px;
+  line-height: 60px;
+  height: 60px;
+  margin-right: -2px;
+  margin-top: -2px;
   padding: 0;
   text-align: center;
-  width: 34px;
+  width: 60px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.square:hover {
+  background: #f0f0f0;
 }
 
 .board-row:after {
@@ -78,7 +84,14 @@ body {
 }
 
 .status {
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  border: 1px solid #dee2e6;
 }
 .header {
   background-color: #282c34;
@@ -99,13 +112,69 @@ body {
   justify-content: center;
   align-items: flex-start;
   min-height: calc(100vh - 120px);
-  padding-top: 20px;
+  padding: 20px;
+  gap: 40px;
+}
+
+.game-board {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .game-info {
-  margin-left: 20px;
+  min-width: 250px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  border: 1px solid #dee2e6;
+}
+
+.toggle-button {
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.toggle-button button {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: bold;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.toggle-button button:hover {
+  background-color: #0056b3;
 }
 
 .square.highlight {
-    background: yellow;
+  background: #ffeb3b;
+  box-shadow: 0 0 10px rgba(255, 235, 59, 0.7);
+}
+
+.game-info ol {
+  max-height: 300px;
+  overflow-y: auto;
+  padding-left: 20px;
+}
+
+.game-info li {
+  margin-bottom: 5px;
+}
+
+.game-info button {
+  padding: 5px 10px;
+  font-size: 14px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.game-info button:hover {
+  background-color: #1e7e34;
 }
