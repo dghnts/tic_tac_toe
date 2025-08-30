@@ -314,21 +314,28 @@ function Game() {
                         isAIMode={isAIMode}
                         aiDifficulty={aiDifficulty}
                     />
-                </div>
-                <div className="game-info">
-                    <AISettings />
-                    <CurrentGameInfo />
-                    <StatsDisplay />
-                    <div className="game-controls">
+                    <div className="board-controls">
                         <button className="reset-button" onClick={resetGame}>
                             New Game
                         </button>
-                        <ToggleButton
-                            isAsc={isAsc}
-                            onToggle={() => setIsAsc((prev) => !prev)}
-                        />
                     </div>
-                    <ol reversed={!isAsc}>{orderedMoves}</ol>
+                </div>
+                <div className="game-info">
+                    <div className="game-settings">
+                        <AISettings />
+                        <CurrentGameInfo />
+                        <StatsDisplay />
+                    </div>
+                    <div className="game-history">
+                        <div className="history-header">
+                            <h3>手番履歴</h3>
+                            <ToggleButton
+                                isAsc={isAsc}
+                                onToggle={() => setIsAsc((prev) => !prev)}
+                            />
+                        </div>
+                        <ol reversed={!isAsc}>{orderedMoves}</ol>
+                    </div>
                 </div>
             </div>
             <Footer />

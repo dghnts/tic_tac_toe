@@ -112,8 +112,10 @@ body {
   justify-content: center;
   align-items: flex-start;
   min-height: calc(100vh - 120px);
-  padding: 20px;
-  gap: 40px;
+  padding: 10px;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .game-board {
@@ -122,20 +124,61 @@ body {
   align-items: center;
 }
 
+.board-controls {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
 .game-info {
-  min-width: 250px;
-  padding: 20px;
+  width: 400px;
+  max-width: 400px;
+  padding: 15px;
   background-color: #f8f9fa;
   border-radius: 10px;
   border: 1px solid #dee2e6;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  max-height: calc(100vh - 200px);
+  overflow: hidden;
 }
 
-.game-controls {
-  margin-bottom: 15px;
-  text-align: center;
+.game-settings {
   display: flex;
-  gap: 10px;
-  justify-content: center;
+  flex-direction: column;
+}
+
+.game-history {
+  display: flex;
+  flex-direction: column;
+}
+
+.game-history h3 {
+  margin: 0;
+  color: #282c34;
+  font-size: 14px;
+}
+
+.toggle-button {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: bold;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.toggle-button:hover {
+  background-color: #0056b3;
 }
 
 .reset-button {
@@ -173,10 +216,12 @@ body {
   box-shadow: 0 0 10px rgba(255, 235, 59, 0.7);
 }
 
-.game-info ol {
-  max-height: 300px;
+.game-history ol {
+  max-height: calc(100vh - 300px);
   overflow-y: auto;
-  padding-left: 20px;
+  padding-left: 15px;
+  margin: 0;
+  flex: 1;
 }
 
 .game-info li {
@@ -346,41 +391,41 @@ body {
 /* Stats Display */
 .stats-display {
   background-color: #e9ecef;
-  padding: 15px;
+  padding: 10px;
   border-radius: 8px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .stats-display h3 {
-  margin: 0 0 10px 0;
+  margin: 0 0 8px 0;
   color: #282c34;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .stats-display p {
-  margin: 5px 0;
-  font-size: 14px;
+  margin: 3px 0;
+  font-size: 13px;
   color: #495057;
 }
 
 /* Current Game Info */
 .current-game-info {
   background-color: #d1ecf1;
-  padding: 15px;
+  padding: 10px;
   border-radius: 8px;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   border: 1px solid #bee5eb;
 }
 
 .current-game-info h3 {
-  margin: 0 0 10px 0;
+  margin: 0 0 8px 0;
   color: #0c5460;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .current-game-info p {
-  margin: 5px 0;
-  font-size: 14px;
+  margin: 3px 0;
+  font-size: 13px;
   color: #0c5460;
   font-weight: bold;
 }
@@ -388,20 +433,20 @@ body {
 /* AI Settings */
 .ai-settings {
   background-color: #fff3cd;
-  padding: 15px;
+  padding: 10px;
   border-radius: 8px;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   border: 1px solid #ffeaa7;
 }
 
 .ai-settings h3 {
-  margin: 0 0 10px 0;
+  margin: 0 0 8px 0;
   color: #856404;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .ai-mode-toggle {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .ai-mode-toggle label {
