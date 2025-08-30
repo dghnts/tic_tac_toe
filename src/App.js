@@ -122,31 +122,32 @@ function Game() {
     const [history, setHistory] = useState([{ squares: Array(9).fill(null), position: null }]);
     const [currentMove, setCurrentMove] = useState(0);
     const [isAsc, setIsAsc] = useState(true);
-    const [gameStartTime, setGameStartTime] = useState(Date.now());
+    const [gameStartTime, setGameStartTime] = useState(null);
     const [currentPlayTime, setCurrentPlayTime] = useState(0);
     const [isAIMode, setIsAIMode] = useState(false);
     const [aiDifficulty, setAiDifficulty] = useState('normal');
     const [gameEnded, setGameEnded] = useState(false);
+    const [gameStarted, setGameStarted] = useState(false);
     const xIsNext = currentMove % 2 === 0;
     const currentSquares = history[currentMove].squares;
     
     const { user, signOut } = useAuth();
     const { stats, saveGame } = useGameData();
     
-    // 現在のゲーム時間を1秒ごとに更新（ゲーム終了時は停止）
+    // 現在のゲーム時間を1秒ごとに更新（ゲーム開始後、終了時は停止）
     useEffect(() => {
-        if (gameEnded) return;
+        if (!gameStarted || gameEnded || !gameStartTime) return;
         
         const timer = setInterval(() => {
             setCurrentPlayTime(Math.floor((Date.now() - gameStartTime) / 1000));
         }, 1000);
         
         return () => clearInterval(timer);
-    }, [gameStartTime, gameEnded]);
+    }, [gameStartTime, gameEnded, gameStarted]);
     
-    // AIの手番処理
+    // AIの手番処理（ゲーム開始後のみ）
     useEffect(() => {
-        if (isAIMode && !xIsNext && currentMove === history.length - 1) {
+        if (gameStarted && isAIMode && !xIsNext && currentMove === history.length - 1) {
             const [winner] = calculateWinner(currentSquares);
             if (!winner && currentSquares.includes(null)) {
                 const timer = setTimeout(() => {
@@ -156,14 +157,17 @@ function Game() {
                         nextSquares[aiMove] = 'O';
                         handlePlay(nextSquares, aiMove);
                     }
-                }, 500); // 0.5秒待ってAIが打つ
+                }, 500);
                 
                 return () => clearTimeout(timer);
             }
         }
-    }, [isAIMode, xIsNext, currentSquares, currentMove, history.length, aiDifficulty]);
+    }, [gameStarted, isAIMode, xIsNext, currentSquares, currentMove, history.length, aiDifficulty]);
 
     function handlePlay(nextSquares, position) {
+        // ゲーム未開始の場合は何もしない
+        if (!gameStarted) return;
+        
         const nextHistory = [
             ...history.slice(0, currentMove + 1),
             { squares: nextSquares, position },
@@ -187,12 +191,20 @@ function Game() {
         setCurrentMove(nextMove);
     }
 
-    function resetGame() {
-        setHistory([{ squares: Array(9).fill(null), position: null }]);
-        setCurrentMove(0);
+    function startGame() {
+        setGameStarted(true);
         setGameStartTime(Date.now());
         setCurrentPlayTime(0);
         setGameEnded(false);
+    }
+    
+    function resetGame() {
+        setHistory([{ squares: Array(9).fill(null), position: null }]);
+        setCurrentMove(0);
+        setGameStartTime(null);
+        setCurrentPlayTime(0);
+        setGameEnded(false);
+        setGameStarted(false);
     }
     
     function toggleAIMode() {
@@ -315,9 +327,15 @@ function Game() {
                         aiDifficulty={aiDifficulty}
                     />
                     <div className="board-controls">
-                        <button className="reset-button" onClick={resetGame}>
-                            New Game
-                        </button>
+                        {!gameStarted ? (
+                            <button className="start-button" onClick={startGame}>
+                                Start Game
+                            </button>
+                        ) : (
+                            <button className="reset-button" onClick={resetGame}>
+                                Reset Game
+                            </button>
+                        )}
                     </div>
                 </div>
                 <div className="game-info">
