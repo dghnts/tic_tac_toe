@@ -178,3 +178,25 @@ body {
 .game-info button:hover {
   background-color: #1e7e34;
 }
+
+.footer {
+  background-color: #282c34;
+  color: white;
+  text-align: center;
+  padding: 15px 0;
+  margin-top: 30px;
+}
+
+.footer p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.footer a {
+  color: #61dafb;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}

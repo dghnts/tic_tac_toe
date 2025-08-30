@@ -100,6 +100,14 @@ function Header() {
     );
 }
 
+function Footer() {
+    return (
+        <footer className="footer">
+            <p>Created by dghnts | <a href="https://github.com/dghnts/tic_tac_toe" target="_blank" rel="noopener noreferrer">tic_tac_toe</a></p>
+        </footer>
+    );
+}
+
 export default function Game() {
     const [history, setHistory] = useState([{ squares: Array(9).fill(null), position: null }]);
     const [currentMove, setCurrentMove] = useState(0);
@@ -172,6 +180,7 @@ export default function Game() {
                     <ol reversed={!isAsc}>{orderedMoves}</ol>
                 </div>
             </div>
+            <Footer />
         </>
     );
 }
