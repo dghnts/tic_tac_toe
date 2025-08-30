@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Auth from "./components/Auth";
 import { useGameData } from "./hooks/useGameData";
 import { useProfile } from "./hooks/useProfile";
+import { useGameHistory } from "./hooks/useGameHistory";
 import { getAIMove } from "./utils/aiPlayer";
 
 function Square({ value, onSquareClick, highlight }) {
@@ -103,7 +104,7 @@ function formatPosition(position) {
     return ` (${Math.floor(position / 3) + 1}, ${position % 3 + 1})`;
 }
 
-function Header({ user, onProfileClick, onLogout, displayName, showDropdown, onToggleDropdown }) {
+function Header({ user, onProfileClick, onLogout, displayName, showDropdown, onToggleDropdown, onStatsClick, onHistoryClick }) {
     return (
         <header className="header">
             <h1>Tic Tac Toe</h1>
@@ -127,6 +128,18 @@ function Header({ user, onProfileClick, onLogout, displayName, showDropdown, onT
                                     onClick={onProfileClick}
                                 >
                                     👤 プロフィール設定
+                                </button>
+                                <button 
+                                    className="dropdown-item" 
+                                    onClick={onStatsClick}
+                                >
+                                    📊 統計情報
+                                </button>
+                                <button 
+                                    className="dropdown-item" 
+                                    onClick={onHistoryClick}
+                                >
+                                    📋 ゲーム履歴
                                 </button>
                                 <div className="dropdown-divider"></div>
                                 <button 
@@ -165,12 +178,15 @@ function Game() {
     const [showSettingsDialog, setShowSettingsDialog] = useState(false);
     const [showProfileDialog, setShowProfileDialog] = useState(false);
     const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
+    const [showStatsDialog, setShowStatsDialog] = useState(false);
+    const [showHistoryDialog, setShowHistoryDialog] = useState(false);
     const xIsNext = currentMove % 2 === 0;
     const currentSquares = history[currentMove].squares;
     
     const { user, signOut } = useAuth();
     const { stats, saveGame } = useGameData();
     const { profile, saveProfile, loading: profileLoading } = useProfile();
+    const { gameHistory, loading: historyLoading, loadGameHistory } = useGameHistory();
     
     // 現在のゲーム時間を1秒ごとに更新（ゲーム開始後、終了時は停止）
     useEffect(() => {
@@ -400,6 +416,15 @@ function Game() {
                     setShowProfileDialog(true);
                     setShowSettingsDropdown(false);
                 }}
+                onStatsClick={() => {
+                    setShowStatsDialog(true);
+                    setShowSettingsDropdown(false);
+                }}
+                onHistoryClick={() => {
+                    setShowHistoryDialog(true);
+                    setShowSettingsDropdown(false);
+                    loadGameHistory();
+                }}
                 onLogout={signOut}
                 showDropdown={showSettingsDropdown}
                 onToggleDropdown={() => setShowSettingsDropdown(!showSettingsDropdown)}
@@ -432,7 +457,6 @@ function Game() {
                 <div className="game-info">
                     <div className="game-settings">
                         <CurrentGameInfo />
-                        <StatsDisplay />
                     </div>
                     <div className="game-history">
                         <div className="history-header">
@@ -449,8 +473,126 @@ function Game() {
             <Footer />
             <SettingsDialog />
             <ProfileDialog />
+            <StatsDialog />
+            <HistoryDialog />
         </>
     );
+    
+    // 統計情報ダイアログコンポーネント
+    function StatsDialog() {
+        if (!showStatsDialog) return null;
+        
+        return (
+            <div className="dialog-overlay" onClick={() => setShowStatsDialog(false)}>
+                <div className="dialog-content" onClick={(e) => e.stopPropagation()}>
+                    <h3>統計情報</h3>
+                    <div className="dialog-body">
+                        <div className="stats-grid">
+                            <div className="stat-item">
+                                <span className="stat-label">総ゲーム数:</span>
+                                <span className="stat-value">{stats.total_games}</span>
+                            </div>
+                            <div className="stat-item">
+                                <span className="stat-label">勝利:</span>
+                                <span className="stat-value">{stats.wins}</span>
+                            </div>
+                            <div className="stat-item">
+                                <span className="stat-label">敗北:</span>
+                                <span className="stat-value">{stats.losses}</span>
+                            </div>
+                            <div className="stat-item">
+                                <span className="stat-label">引き分け:</span>
+                                <span className="stat-value">{stats.draws}</span>
+                            </div>
+                            {stats.total_games > 0 && (
+                                <div className="stat-item">
+                                    <span className="stat-label">勝率:</span>
+                                    <span className="stat-value">{Math.round((stats.wins / stats.total_games) * 100)}%</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    <div className="dialog-buttons">
+                        <button 
+                            className="apply-button" 
+                            onClick={() => setShowStatsDialog(false)}
+                        >
+                            閉じる
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+    
+    // ゲーム履歴ダイアログコンポーネント
+    function HistoryDialog() {
+        if (!showHistoryDialog) return null;
+        
+        const formatDate = (dateString) => {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ja-JP', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        };
+        
+        const getWinnerText = (winner) => {
+            if (winner === 'X') return '勝利';
+            if (winner === 'O') return '敗北';
+            return '引き分け';
+        };
+        
+        const getWinnerClass = (winner) => {
+            if (winner === 'X') return 'winner-win';
+            if (winner === 'O') return 'winner-lose';
+            return 'winner-draw';
+        };
+        
+        return (
+            <div className="dialog-overlay" onClick={() => setShowHistoryDialog(false)}>
+                <div className="dialog-content history-dialog" onClick={(e) => e.stopPropagation()}>
+                    <h3>ゲーム履歴</h3>
+                    <div className="dialog-body">
+                        {historyLoading ? (
+                            <div className="loading-text">読み込み中...</div>
+                        ) : gameHistory.length === 0 ? (
+                            <div className="no-history">ゲーム履歴がありません</div>
+                        ) : (
+                            <div className="history-list">
+                                {gameHistory.map((game) => (
+                                    <div key={game.id} className="history-item">
+                                        <div className="history-header">
+                                            <span className={`history-result ${getWinnerClass(game.winner)}`}>
+                                                {getWinnerText(game.winner)}
+                                            </span>
+                                            <span className="history-date">
+                                                {formatDate(game.created_at)}
+                                            </span>
+                                        </div>
+                                        <div className="history-details">
+                                            <span>手数: {game.moves_count}</span>
+                                            <span>時間: {formatPlayTime(game.duration_seconds || 0)}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                    <div className="dialog-buttons">
+                        <button 
+                            className="apply-button" 
+                            onClick={() => setShowHistoryDialog(false)}
+                        >
+                            閉じる
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
     
     // プロフィールダイアログコンポーネント
     function ProfileDialog() {
