@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Auth from "./components/Auth";
+import { useGameData } from "./hooks/useGameData";
 
 function Square({ value, onSquareClick, highlight }) {
     return (
@@ -114,8 +115,22 @@ function Game() {
     const [history, setHistory] = useState([{ squares: Array(9).fill(null), position: null }]);
     const [currentMove, setCurrentMove] = useState(0);
     const [isAsc, setIsAsc] = useState(true);
+    const [gameStartTime, setGameStartTime] = useState(Date.now());
+    const [currentPlayTime, setCurrentPlayTime] = useState(0);
     const xIsNext = currentMove % 2 === 0;
     const currentSquares = history[currentMove].squares;
+    
+    const { user, signOut } = useAuth();
+    const { stats, saveGame } = useGameData();
+    
+    // 現在のゲーム時間を1秒ごとに更新
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentPlayTime(Math.floor((Date.now() - gameStartTime) / 1000));
+        }, 1000);
+        
+        return () => clearInterval(timer);
+    }, [gameStartTime]);
 
     function handlePlay(nextSquares, position) {
         const nextHistory = [
@@ -124,6 +139,16 @@ function Game() {
         ];
         setHistory(nextHistory);
         setCurrentMove(nextHistory.length - 1);
+        
+        // ゲーム終了チェック
+        const [winner] = calculateWinner(nextSquares);
+        const isGameEnd = winner || nextHistory.length === 10;
+        
+        if (isGameEnd) {
+            const durationSeconds = Math.floor((Date.now() - gameStartTime) / 1000);
+            const finalWinner = winner || 'draw';
+            saveGame(finalWinner, nextHistory.length - 1, nextHistory, durationSeconds);
+        }
     }
 
     function jumpTo(nextMove) {
@@ -133,6 +158,8 @@ function Game() {
     function resetGame() {
         setHistory([{ squares: Array(9).fill(null), position: null }]);
         setCurrentMove(0);
+        setGameStartTime(Date.now());
+        setCurrentPlayTime(0);
     }
 
     const moves = history.map((step, move) => {
@@ -165,7 +192,39 @@ function Game() {
 
     const orderedMoves = isAsc ? moves : moves.slice().reverse();
 
-    const { user, signOut } = useAuth();
+    // 時間フォーマット関数
+    const formatPlayTime = (seconds) => {
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        
+        if (minutes > 0) {
+            return `${minutes}分${secs}秒`;
+        } else {
+            return `${secs}秒`;
+        }
+    };
+    
+    // 統計情報表示コンポーネント
+    const StatsDisplay = () => (
+        <div className="stats-display">
+            <h3>統計情報</h3>
+            <p>総ゲーム数: {stats.total_games}</p>
+            <p>勝利: {stats.wins}</p>
+            <p>敗北: {stats.losses}</p>
+            <p>引き分け: {stats.draws}</p>
+            {stats.total_games > 0 && (
+                <p>勝率: {Math.round((stats.wins / stats.total_games) * 100)}%</p>
+            )}
+        </div>
+    );
+    
+    // 現在のゲーム情報表示コンポーネント
+    const CurrentGameInfo = () => (
+        <div className="current-game-info">
+            <h3>現在のゲーム</h3>
+            <p>プレイ時間: {formatPlayTime(currentPlayTime)}</p>
+        </div>
+    );
 
     return (
         <>
@@ -186,6 +245,8 @@ function Game() {
                     />
                 </div>
                 <div className="game-info">
+                    <CurrentGameInfo />
+                    <StatsDisplay />
                     <div className="game-controls">
                         <button className="reset-button" onClick={resetGame}>
                             New Game

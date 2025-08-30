@@ -342,3 +342,45 @@ body {
   font-size: 18px;
   color: #666;
 }
+
+/* Stats Display */
+.stats-display {
+  background-color: #e9ecef;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.stats-display h3 {
+  margin: 0 0 10px 0;
+  color: #282c34;
+  font-size: 16px;
+}
+
+.stats-display p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #495057;
+}
+
+/* Current Game Info */
+.current-game-info {
+  background-color: #d1ecf1;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #bee5eb;
+}
+
+.current-game-info h3 {
+  margin: 0 0 10px 0;
+  color: #0c5460;
+  font-size: 16px;
+}
+
+.current-game-info p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #0c5460;
+  font-weight: bold;
+}
