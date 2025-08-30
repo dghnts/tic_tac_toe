@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import Auth from "./components/Auth";
 
 function Square({ value, onSquareClick, highlight }) {
     return (
@@ -108,7 +110,7 @@ function Footer() {
     );
 }
 
-export default function Game() {
+function Game() {
     const [history, setHistory] = useState([{ squares: Array(9).fill(null), position: null }]);
     const [currentMove, setCurrentMove] = useState(0);
     const [isAsc, setIsAsc] = useState(true);
@@ -163,9 +165,17 @@ export default function Game() {
 
     const orderedMoves = isAsc ? moves : moves.slice().reverse();
 
+    const { user, signOut } = useAuth();
+
     return (
         <>
             <Header />
+            {user && (
+                <div className="user-info">
+                    <span>ログイン中: {user.email}</span>
+                    <button onClick={signOut}>ログアウト</button>
+                </div>
+            )}
             <div className="game">
                 <div className="game-board">
                     <Board
@@ -191,4 +201,22 @@ export default function Game() {
             <Footer />
         </>
     );
+}
+
+export default function App() {
+    return (
+        <AuthProvider>
+            <AuthenticatedApp />
+        </AuthProvider>
+    );
+}
+
+function AuthenticatedApp() {
+    const { user, loading } = useAuth();
+
+    if (loading) {
+        return <div className="loading">読み込み中...</div>;
+    }
+
+    return user ? <Game /> : <Auth />;
 }
