@@ -196,6 +196,123 @@ body {
   background-color: #0056b3;
 }
 
+/* Settings Button */
+.mode-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3px;
+}
+
+.settings-button {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 3px;
+}
+
+.settings-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Settings Dialog */
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.dialog-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  min-width: 300px;
+  max-width: 400px;
+}
+
+.dialog-content h3 {
+  margin: 0 0 15px 0;
+  color: #282c34;
+  text-align: center;
+}
+
+.dialog-body {
+  margin-bottom: 20px;
+}
+
+.mode-selection {
+  margin-bottom: 15px;
+}
+
+.mode-selection label {
+  display: block;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.mode-selection input[type="radio"] {
+  margin-right: 8px;
+}
+
+.difficulty-selection {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.difficulty-selection label {
+  font-weight: bold;
+}
+
+.difficulty-selection select {
+  padding: 5px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+}
+
+.dialog-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.cancel-button {
+  padding: 8px 16px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cancel-button:hover {
+  background-color: #5a6268;
+}
+
+.apply-button {
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.apply-button:hover {
+  background-color: #0056b3;
+}
+
 .reset-button {
   padding: 8px 16px;
   font-size: 14px;

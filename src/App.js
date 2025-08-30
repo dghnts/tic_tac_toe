@@ -128,6 +128,7 @@ function Game() {
     const [aiDifficulty, setAiDifficulty] = useState('normal');
     const [gameEnded, setGameEnded] = useState(false);
     const [gameStarted, setGameStarted] = useState(false);
+    const [showSettingsDialog, setShowSettingsDialog] = useState(false);
     const xIsNext = currentMove % 2 === 0;
     const currentSquares = history[currentMove].squares;
     
@@ -207,8 +208,10 @@ function Game() {
         setGameStarted(false);
     }
     
-    function toggleAIMode() {
-        setIsAIMode(!isAIMode);
+    function applySettings(newIsAIMode, newAiDifficulty) {
+        setIsAIMode(newIsAIMode);
+        setAiDifficulty(newAiDifficulty);
+        setShowSettingsDialog(false);
         resetGame();
     }
 
@@ -272,40 +275,84 @@ function Game() {
     const CurrentGameInfo = () => (
         <div className="current-game-info">
             <h3>現在のゲーム</h3>
-            <p>モード: {isAIMode ? `AI対戦 (${aiDifficulty})` : '人対人'}</p>
+            <div className="mode-info">
+                <span>モード: {isAIMode ? `AI対戦 (${aiDifficulty})` : '人対人'}</span>
+                <button 
+                    className="settings-button" 
+                    onClick={() => setShowSettingsDialog(true)}
+                    title="設定"
+                >
+                    ⚙️
+                </button>
+            </div>
             <p>プレイ時間: {formatPlayTime(currentPlayTime)}</p>
         </div>
     );
     
-    // AI設定コンポーネント
-    const AISettings = () => (
-        <div className="ai-settings">
-            <h3>AI設定</h3>
-            <div className="ai-mode-toggle">
-                <label>
-                    <input
-                        type="checkbox"
-                        checked={isAIMode}
-                        onChange={toggleAIMode}
-                    />
-                    AI対戦モード
-                </label>
-            </div>
-            {isAIMode && (
-                <div className="difficulty-select">
-                    <label>難易度:</label>
-                    <select
-                        value={aiDifficulty}
-                        onChange={(e) => setAiDifficulty(e.target.value)}
-                    >
-                        <option value="easy">簡単</option>
-                        <option value="normal">普通</option>
-                        <option value="hard">難しい</option>
-                    </select>
+    // 設定ダイアログコンポーネント
+    const SettingsDialog = () => {
+        const [tempIsAIMode, setTempIsAIMode] = useState(isAIMode);
+        const [tempAiDifficulty, setTempAiDifficulty] = useState(aiDifficulty);
+        
+        if (!showSettingsDialog) return null;
+        
+        return (
+            <div className="dialog-overlay" onClick={() => setShowSettingsDialog(false)}>
+                <div className="dialog-content" onClick={(e) => e.stopPropagation()}>
+                    <h3>対戦モード設定</h3>
+                    <div className="dialog-body">
+                        <div className="mode-selection">
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="gameMode"
+                                    checked={!tempIsAIMode}
+                                    onChange={() => setTempIsAIMode(false)}
+                                />
+                                人対人
+                            </label>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="gameMode"
+                                    checked={tempIsAIMode}
+                                    onChange={() => setTempIsAIMode(true)}
+                                />
+                                AI対戦
+                            </label>
+                        </div>
+                        {tempIsAIMode && (
+                            <div className="difficulty-selection">
+                                <label>難易度:</label>
+                                <select
+                                    value={tempAiDifficulty}
+                                    onChange={(e) => setTempAiDifficulty(e.target.value)}
+                                >
+                                    <option value="easy">簡単</option>
+                                    <option value="normal">普通</option>
+                                    <option value="hard">難しい</option>
+                                </select>
+                            </div>
+                        )}
+                    </div>
+                    <div className="dialog-buttons">
+                        <button 
+                            className="cancel-button" 
+                            onClick={() => setShowSettingsDialog(false)}
+                        >
+                            キャンセル
+                        </button>
+                        <button 
+                            className="apply-button" 
+                            onClick={() => applySettings(tempIsAIMode, tempAiDifficulty)}
+                        >
+                            適用
+                        </button>
+                    </div>
                 </div>
-            )}
-        </div>
-    );
+            </div>
+        );
+    };
 
     return (
         <>
@@ -340,7 +387,6 @@ function Game() {
                 </div>
                 <div className="game-info">
                     <div className="game-settings">
-                        <AISettings />
                         <CurrentGameInfo />
                         <StatsDisplay />
                     </div>
@@ -357,6 +403,7 @@ function Game() {
                 </div>
             </div>
             <Footer />
+            <SettingsDialog />
         </>
     );
 }
