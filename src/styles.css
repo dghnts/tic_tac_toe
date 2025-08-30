@@ -4,7 +4,7 @@
 
 body {
   font-family: sans-serif;
-  margin: 20px;
+  margin: 0;
   padding: 0;
 }
 
@@ -80,9 +80,26 @@ body {
 .status {
   margin-bottom: 10px;
 }
+.header {
+  background-color: #282c34;
+  color: white;
+  text-align: center;
+  padding: 20px 0;
+  margin-bottom: 30px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+}
+
 .game {
   display: flex;
   flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: calc(100vh - 120px);
+  padding-top: 20px;
 }
 
 .game-info {

@@ -92,6 +92,14 @@ function formatPosition(position) {
     return ` (${Math.floor(position / 3) + 1}, ${position % 3 + 1})`;
 }
 
+function Header() {
+    return (
+        <header className="header">
+            <h1>Tic Tac Toe</h1>
+        </header>
+    );
+}
+
 export default function Game() {
     const [history, setHistory] = useState([{ squares: Array(9).fill(null), position: null }]);
     const [currentMove, setCurrentMove] = useState(0);
@@ -143,24 +151,27 @@ export default function Game() {
     const orderedMoves = isAsc ? moves : moves.slice().reverse();
 
     return (
-        <div className="game">
-            <div className="game-board">
-                <Board
-                    xIsNext={xIsNext}
-                    squares={currentSquares}
-                    currentMove={currentMove}
-                    onPlay={handlePlay}
-                />
-            </div>
-            <div className="game-info">
-                <div className="toggle-button">
-                    <ToggleButton
-                        isAsc={isAsc}
-                        onToggle={() => setIsAsc((prev) => !prev)}
+        <>
+            <Header />
+            <div className="game">
+                <div className="game-board">
+                    <Board
+                        xIsNext={xIsNext}
+                        squares={currentSquares}
+                        currentMove={currentMove}
+                        onPlay={handlePlay}
                     />
                 </div>
-                <ol reversed={!isAsc}>{orderedMoves}</ol>
+                <div className="game-info">
+                    <div className="toggle-button">
+                        <ToggleButton
+                            isAsc={isAsc}
+                            onToggle={() => setIsAsc((prev) => !prev)}
+                        />
+                    </div>
+                    <ol reversed={!isAsc}>{orderedMoves}</ol>
+                </div>
             </div>
-        </div>
+        </>
     );
 }
