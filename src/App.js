@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Auth from "./components/Auth";
 import { useGameData } from "./hooks/useGameData";
+import { useProfile } from "./hooks/useProfile";
 import { getAIMove } from "./utils/aiPlayer";
 
 function Square({ value, onSquareClick, highlight }) {
@@ -102,10 +103,43 @@ function formatPosition(position) {
     return ` (${Math.floor(position / 3) + 1}, ${position % 3 + 1})`;
 }
 
-function Header() {
+function Header({ user, onProfileClick, onLogout, displayName, showDropdown, onToggleDropdown }) {
     return (
         <header className="header">
             <h1>Tic Tac Toe</h1>
+            {user && (
+                <div className="header-user-info">
+                    <span className="header-user-name">
+                        {displayName || user.email}
+                    </span>
+                    <div className="settings-dropdown">
+                        <button 
+                            className="settings-dropdown-button" 
+                            onClick={onToggleDropdown}
+                            title="設定"
+                        >
+                            ⚙️
+                        </button>
+                        {showDropdown && (
+                            <div className="settings-dropdown-menu">
+                                <button 
+                                    className="dropdown-item" 
+                                    onClick={onProfileClick}
+                                >
+                                    👤 プロフィール設定
+                                </button>
+                                <div className="dropdown-divider"></div>
+                                <button 
+                                    className="dropdown-item logout-item" 
+                                    onClick={onLogout}
+                                >
+                                    🚪 ログアウト
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </header>
     );
 }
@@ -129,11 +163,14 @@ function Game() {
     const [gameEnded, setGameEnded] = useState(false);
     const [gameStarted, setGameStarted] = useState(false);
     const [showSettingsDialog, setShowSettingsDialog] = useState(false);
+    const [showProfileDialog, setShowProfileDialog] = useState(false);
+    const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
     const xIsNext = currentMove % 2 === 0;
     const currentSquares = history[currentMove].squares;
     
     const { user, signOut } = useAuth();
     const { stats, saveGame } = useGameData();
+    const { profile, saveProfile, loading: profileLoading } = useProfile();
     
     // 現在のゲーム時間を1秒ごとに更新（ゲーム開始後、終了時は停止）
     useEffect(() => {
@@ -356,14 +393,21 @@ function Game() {
 
     return (
         <>
-            <Header />
-            {user && (
-                <div className="user-info">
-                    <span>ログイン中: {user.email}</span>
-                    <button onClick={signOut}>ログアウト</button>
-                </div>
-            )}
-            <div className="game">
+            <Header 
+                user={user}
+                displayName={profile.display_name}
+                onProfileClick={() => {
+                    setShowProfileDialog(true);
+                    setShowSettingsDropdown(false);
+                }}
+                onLogout={signOut}
+                showDropdown={showSettingsDropdown}
+                onToggleDropdown={() => setShowSettingsDropdown(!showSettingsDropdown)}
+            />
+            <div 
+                className="game" 
+                onClick={() => setShowSettingsDropdown(false)}
+            >
                 <div className="game-board">
                     <Board
                         xIsNext={xIsNext}
@@ -404,8 +448,72 @@ function Game() {
             </div>
             <Footer />
             <SettingsDialog />
+            <ProfileDialog />
         </>
     );
+    
+    // プロフィールダイアログコンポーネント
+    function ProfileDialog() {
+        const [tempDisplayName, setTempDisplayName] = useState(profile.display_name || '');
+        const [saving, setSaving] = useState(false);
+        
+        useEffect(() => {
+            if (showProfileDialog) {
+                setTempDisplayName(profile.display_name || '');
+            }
+        }, [showProfileDialog, profile.display_name]);
+        
+        if (!showProfileDialog) return null;
+        
+        const handleSave = async () => {
+            setSaving(true);
+            const result = await saveProfile(tempDisplayName.trim());
+            setSaving(false);
+            
+            if (result.success) {
+                setShowProfileDialog(false);
+            }
+        };
+        
+        return (
+            <div className="dialog-overlay" onClick={() => setShowProfileDialog(false)}>
+                <div className="dialog-content" onClick={(e) => e.stopPropagation()}>
+                    <h3>プロフィール設定</h3>
+                    <div className="dialog-body">
+                        <div className="profile-field">
+                            <label>ユーザー名:</label>
+                            <input
+                                type="text"
+                                value={tempDisplayName}
+                                onChange={(e) => setTempDisplayName(e.target.value)}
+                                placeholder="ユーザー名を入力"
+                                maxLength={50}
+                            />
+                        </div>
+                        <div className="profile-info">
+                            <small>メール: {user.email}</small>
+                        </div>
+                    </div>
+                    <div className="dialog-buttons">
+                        <button 
+                            className="cancel-button" 
+                            onClick={() => setShowProfileDialog(false)}
+                            disabled={saving}
+                        >
+                            キャンセル
+                        </button>
+                        <button 
+                            className="apply-button" 
+                            onClick={handleSave}
+                            disabled={saving || profileLoading}
+                        >
+                            {saving ? '保存中...' : '保存'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 }
 
 export default function App() {
