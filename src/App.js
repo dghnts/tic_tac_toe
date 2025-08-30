@@ -336,18 +336,39 @@ function Game() {
     // 現在のゲーム情報表示コンポーネント
     const CurrentGameInfo = () => (
         <div className="current-game-info">
-            <h3>現在のゲーム</h3>
-            <div className="mode-info">
-                <span>モード: {isAIMode ? `AI対戦 (${aiDifficulty})` : '人対人'}</span>
-                <button 
-                    className="settings-button" 
-                    onClick={() => setShowSettingsDialog(true)}
-                    title="設定"
-                >
-                    ⚙️
-                </button>
+            <div className="game-mode-row">
+                <label className="switch">
+                    <input 
+                        type="checkbox" 
+                        checked={isAIMode}
+                        onChange={() => {
+                            setIsAIMode(!isAIMode);
+                            resetGame();
+                        }}
+                    />
+                    <span className="slider">
+                        <span className="slider-text left">AI</span>
+                        <span className="slider-text right">手動</span>
+                    </span>
+                </label>
+                {isAIMode && (
+                    <select 
+                        className="difficulty-mini-select"
+                        value={aiDifficulty}
+                        onChange={(e) => {
+                            setAiDifficulty(e.target.value);
+                            resetGame();
+                        }}
+                    >
+                        <option value="easy">簡単</option>
+                        <option value="normal">普通</option>
+                        <option value="hard">難しい</option>
+                    </select>
+                )}
             </div>
-            <p>プレイ時間: {formatPlayTime(currentPlayTime)}</p>
+            <div className="play-time-row">
+                <span>プレイ時間: {formatPlayTime(currentPlayTime)}</span>
+            </div>
         </div>
     );
     
