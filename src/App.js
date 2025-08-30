@@ -85,7 +85,7 @@ function calculateWinner(squares) {
 }
 
 function ToggleButton({ isAsc, onToggle }) {
-    return <button onClick={onToggle}>{isAsc ? "ASC" : "DESC"}</button>;
+    return <button className="toggle-button" onClick={onToggle}>{isAsc ? "ASC" : "DESC"}</button>;
 }
 
 function formatPosition(position) {
@@ -126,6 +126,11 @@ export default function Game() {
 
     function jumpTo(nextMove) {
         setCurrentMove(nextMove);
+    }
+
+    function resetGame() {
+        setHistory([{ squares: Array(9).fill(null), position: null }]);
+        setCurrentMove(0);
     }
 
     const moves = history.map((step, move) => {
@@ -171,7 +176,10 @@ export default function Game() {
                     />
                 </div>
                 <div className="game-info">
-                    <div className="toggle-button">
+                    <div className="game-controls">
+                        <button className="reset-button" onClick={resetGame}>
+                            New Game
+                        </button>
                         <ToggleButton
                             isAsc={isAsc}
                             onToggle={() => setIsAsc((prev) => !prev)}
