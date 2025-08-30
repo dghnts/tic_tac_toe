@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Auth from "./components/Auth";
 import { useGameData } from "./hooks/useGameData";
+import { getAIMove } from "./utils/aiPlayer";
 
 function Square({ value, onSquareClick, highlight }) {
     return (
@@ -14,15 +15,21 @@ function Square({ value, onSquareClick, highlight }) {
     );
 }
 
-function Board({ xIsNext, squares, currentMove, onPlay }) {
+function Board({ xIsNext, squares, currentMove, onPlay, isAIMode, aiDifficulty }) {
     const [winner, a, b, c] = calculateWinner(squares);
     function handleClick(i) {
         if (squares[i] || winner) {
             return;
         }
+        
+        // AIモードでOの手番の場合はクリックを無視
+        if (isAIMode && !xIsNext) {
+            return;
+        }
+        
         const nextSquares = squares.slice();
         nextSquares[i] = xIsNext ? "X" : "O";
-        onPlay(nextSquares, i); // 位置も渡す
+        onPlay(nextSquares, i);
     }
 
 
@@ -117,20 +124,44 @@ function Game() {
     const [isAsc, setIsAsc] = useState(true);
     const [gameStartTime, setGameStartTime] = useState(Date.now());
     const [currentPlayTime, setCurrentPlayTime] = useState(0);
+    const [isAIMode, setIsAIMode] = useState(false);
+    const [aiDifficulty, setAiDifficulty] = useState('normal');
+    const [gameEnded, setGameEnded] = useState(false);
     const xIsNext = currentMove % 2 === 0;
     const currentSquares = history[currentMove].squares;
     
     const { user, signOut } = useAuth();
     const { stats, saveGame } = useGameData();
     
-    // 現在のゲーム時間を1秒ごとに更新
+    // 現在のゲーム時間を1秒ごとに更新（ゲーム終了時は停止）
     useEffect(() => {
+        if (gameEnded) return;
+        
         const timer = setInterval(() => {
             setCurrentPlayTime(Math.floor((Date.now() - gameStartTime) / 1000));
         }, 1000);
         
         return () => clearInterval(timer);
-    }, [gameStartTime]);
+    }, [gameStartTime, gameEnded]);
+    
+    // AIの手番処理
+    useEffect(() => {
+        if (isAIMode && !xIsNext && currentMove === history.length - 1) {
+            const [winner] = calculateWinner(currentSquares);
+            if (!winner && currentSquares.includes(null)) {
+                const timer = setTimeout(() => {
+                    const aiMove = getAIMove([...currentSquares], aiDifficulty);
+                    if (aiMove !== null) {
+                        const nextSquares = [...currentSquares];
+                        nextSquares[aiMove] = 'O';
+                        handlePlay(nextSquares, aiMove);
+                    }
+                }, 500); // 0.5秒待ってAIが打つ
+                
+                return () => clearTimeout(timer);
+            }
+        }
+    }, [isAIMode, xIsNext, currentSquares, currentMove, history.length, aiDifficulty]);
 
     function handlePlay(nextSquares, position) {
         const nextHistory = [
@@ -145,6 +176,7 @@ function Game() {
         const isGameEnd = winner || nextHistory.length === 10;
         
         if (isGameEnd) {
+            setGameEnded(true);
             const durationSeconds = Math.floor((Date.now() - gameStartTime) / 1000);
             const finalWinner = winner || 'draw';
             saveGame(finalWinner, nextHistory.length - 1, nextHistory, durationSeconds);
@@ -160,6 +192,12 @@ function Game() {
         setCurrentMove(0);
         setGameStartTime(Date.now());
         setCurrentPlayTime(0);
+        setGameEnded(false);
+    }
+    
+    function toggleAIMode() {
+        setIsAIMode(!isAIMode);
+        resetGame();
     }
 
     const moves = history.map((step, move) => {
@@ -222,7 +260,38 @@ function Game() {
     const CurrentGameInfo = () => (
         <div className="current-game-info">
             <h3>現在のゲーム</h3>
+            <p>モード: {isAIMode ? `AI対戦 (${aiDifficulty})` : '人対人'}</p>
             <p>プレイ時間: {formatPlayTime(currentPlayTime)}</p>
+        </div>
+    );
+    
+    // AI設定コンポーネント
+    const AISettings = () => (
+        <div className="ai-settings">
+            <h3>AI設定</h3>
+            <div className="ai-mode-toggle">
+                <label>
+                    <input
+                        type="checkbox"
+                        checked={isAIMode}
+                        onChange={toggleAIMode}
+                    />
+                    AI対戦モード
+                </label>
+            </div>
+            {isAIMode && (
+                <div className="difficulty-select">
+                    <label>難易度:</label>
+                    <select
+                        value={aiDifficulty}
+                        onChange={(e) => setAiDifficulty(e.target.value)}
+                    >
+                        <option value="easy">簡単</option>
+                        <option value="normal">普通</option>
+                        <option value="hard">難しい</option>
+                    </select>
+                </div>
+            )}
         </div>
     );
 
@@ -242,9 +311,12 @@ function Game() {
                         squares={currentSquares}
                         currentMove={currentMove}
                         onPlay={handlePlay}
+                        isAIMode={isAIMode}
+                        aiDifficulty={aiDifficulty}
                     />
                 </div>
                 <div className="game-info">
+                    <AISettings />
                     <CurrentGameInfo />
                     <StatsDisplay />
                     <div className="game-controls">

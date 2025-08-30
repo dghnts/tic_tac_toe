@@ -384,3 +384,67 @@ body {
   color: #0c5460;
   font-weight: bold;
 }
+
+/* AI Settings */
+.ai-settings {
+  background-color: #fff3cd;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #ffeaa7;
+}
+
+.ai-settings h3 {
+  margin: 0 0 10px 0;
+  color: #856404;
+  font-size: 16px;
+}
+
+.ai-mode-toggle {
+  margin-bottom: 10px;
+}
+
+.ai-mode-toggle label {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #856404;
+  cursor: pointer;
+}
+
+.ai-mode-toggle input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+.difficulty-select {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.difficulty-select label {
+  font-size: 14px;
+  color: #856404;
+  font-weight: bold;
+}
+
+.difficulty-select select {
+  padding: 5px 10px;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+  background-color: white;
+  color: #856404;
+  min-width: 80px;
+  cursor: pointer;
+}
+
+.difficulty-select select:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+.difficulty-select select option {
+  padding: 5px;
+  background-color: white;
+  color: #856404;
+}
