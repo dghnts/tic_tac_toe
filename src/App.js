@@ -4,6 +4,7 @@ import Auth from "./components/Auth";
 import { useGameData } from "./hooks/useGameData";
 import { useProfile } from "./hooks/useProfile";
 import { useGameHistory } from "./hooks/useGameHistory";
+import { useTheme } from "./hooks/useTheme";
 import { getAIMove } from "./utils/aiPlayer";
 
 function Square({ value, onSquareClick, highlight }) {
@@ -104,7 +105,7 @@ function formatPosition(position) {
     return ` (${Math.floor(position / 3) + 1}, ${position % 3 + 1})`;
 }
 
-function Header({ user, onProfileClick, onLogout, displayName, showDropdown, onToggleDropdown, onStatsClick, onHistoryClick }) {
+function Header({ user, onProfileClick, onLogout, displayName, showDropdown, onToggleDropdown, onStatsClick, onHistoryClick, theme, onThemeToggle }) {
     return (
         <header className="header">
             <h1>Tic Tac Toe</h1>
@@ -113,6 +114,13 @@ function Header({ user, onProfileClick, onLogout, displayName, showDropdown, onT
                     <span className="header-user-name">
                         {displayName || user.email}
                     </span>
+                    <button 
+                        className="theme-toggle-button" 
+                        onClick={onThemeToggle}
+                        title={theme === 'light' ? 'ダークモードに切り替え' : 'ライトモードに切り替え'}
+                    >
+                        {theme === 'light' ? '🌙' : '☀️'}
+                    </button>
                     <div className="settings-dropdown">
                         <button 
                             className="settings-dropdown-button" 
@@ -187,6 +195,7 @@ function Game() {
     const { stats, saveGame } = useGameData();
     const { profile, saveProfile, loading: profileLoading } = useProfile();
     const { gameHistory, loading: historyLoading, loadGameHistory } = useGameHistory();
+    const { theme, toggleTheme } = useTheme();
     
     // 現在のゲーム時間を1秒ごとに更新（ゲーム開始後、終了時は停止）
     useEffect(() => {
@@ -425,6 +434,8 @@ function Game() {
                     setShowSettingsDropdown(false);
                     loadGameHistory();
                 }}
+                theme={theme}
+                onThemeToggle={toggleTheme}
                 onLogout={signOut}
                 showDropdown={showSettingsDropdown}
                 onToggleDropdown={() => setShowSettingsDropdown(!showSettingsDropdown)}
